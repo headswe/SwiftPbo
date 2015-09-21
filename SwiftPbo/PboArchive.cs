@@ -156,14 +156,6 @@ namespace SwiftPbo
                 var s = PboUtilities.ReadString(stream);
                 list.Add(s);
             }
-           /* var oldpos = stream.Position;
-            var s = PboUtilities.ReadString(stream);
-            if (s.ToLower() == "depbo.dll")
-                stream.ReadByte();
-            else
-            {
-                stream.Position = oldpos + 1;
-            }*/
             _productEntry = new ProductEntry(prefix,pboname,version,list); 
             return true;
         }
