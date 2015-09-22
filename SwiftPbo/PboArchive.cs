@@ -179,10 +179,10 @@ namespace SwiftPbo
                     stream.Write(hash,0,20);
                 }
             }
-            catch (Exception)
+            catch (Exception e)
             {
-                
-                throw;
+                Console.WriteLine(e.Message);
+                return false;
             }
             return true;
         }
@@ -489,6 +489,7 @@ namespace SwiftPbo
         public static string GetRelativePath(string filespec, string folder)
         {
             Uri pathUri = new Uri(filespec);
+            
             // Folders must end in a slash
             if (!folder.EndsWith(Path.DirectorySeparatorChar.ToString()))
             {

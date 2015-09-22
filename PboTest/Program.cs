@@ -10,26 +10,52 @@ namespace PboTest
 {
     internal class Program
     {
-        private static void Main(string[] args)
+        private static int Main(string[] args)
         {
-            var done = PboArchive.Create("H:\\testpbo", "H:\\testpbo\\testpbo.pbo",
-                new ProductEntry("prefix", "testpbo", "Mikero", new List<string>() { "DePbo.dll" }));
-            var inpath = "rhsusf_infantry.pbo";
-            var cake = new PboArchive(inpath);
+            var done = PboArchive.Create(new DirectoryInfo("indata").FullName, "testpbo.pbo",
+                new ProductEntry("prefix", "testpbo", "Head", new List<string>() { "SwiftPbo.dll" }));
+            if (!done)
+                return 1;
+            var inpath = "testpbo.pbo";
+            PboArchive cake;
+            try
+            {
+                cake = new PboArchive(inpath);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+                return 2;
+            }
+
             var files = new Dictionary<FileEntry, string>();
             foreach (var fileEntry in cake.Files)
             {
-                var path = Path.Combine("test", fileEntry.FileName);
+                var path = Path.Combine("output", fileEntry.FileName);
                 fileEntry.Extract(path);
                 files.Add(fileEntry, path);
             }
             var file = cake.Files[0];
-            var stream = file.Extract();
-            stream.Close();
-            PboArchive.Create(@"nottest.pbo", cake.ProductEntry, files, cake.Checksum);
-           Console.WriteLine(FilesAreEqual(new FileInfo(inpath), new FileInfo("nottest.pbo")));
-            Console.Read();
+            try
+            {
+                var stream = file.Extract();
+                stream.Close();
+            }
+            catch (Exception)
+            {
 
+                return 3;
+            }
+            try
+            {
+                PboArchive.Create(@"nottest.pbo", cake.ProductEntry, files, cake.Checksum);
+            }
+            catch (Exception)
+            {
+                return 4;
+            }
+
+            return !FilesAreEqual(new FileInfo(inpath), new FileInfo("nottest.pbo")) ? 5 : 0;
         }
 
         private const int BYTES_TO_READ = sizeof (Int64);
