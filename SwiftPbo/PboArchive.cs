@@ -1,13 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Dynamic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
-using System.Threading.Tasks;
-using System.Xml.Linq;
 
 namespace SwiftPbo
 {
@@ -16,14 +13,15 @@ namespace SwiftPbo
         private String _prefix;
         private String _productName;
         private String _productVersion;
-        private List<string> _addtional = new List<string>(); 
-        public ProductEntry(string prefix, string productName, string productVersion,List<string> addList = null )
+        private List<string> _addtional = new List<string>();
+
+        public ProductEntry(string prefix, string productName, string productVersion, List<string> addList = null)
         {
             Prefix = prefix;
             ProductName = productName;
             ProductVersion = productVersion;
-            if(addList != null)
-             Addtional = addList;
+            if (addList != null)
+                Addtional = addList;
         }
 
         public string Prefix
@@ -50,80 +48,16 @@ namespace SwiftPbo
             set { _addtional = value; }
         }
     }
+
     public enum PackingType
     {
         Uncompressed,
         Packed
     };
-    public class FileEntry
-    {
-        public String FileName;
-        public PackingType PackingMethod = PackingType.Uncompressed;
-        public ulong OriginalSize;
-        public ulong TimeStamp;
-        public ulong Unknown;
-        public ulong DataSize;
-        public override string ToString()
-        {
-            return String.Format("{0} ({1})", FileName, OriginalSize);
-        }
-
-        private readonly PboArchive _parentArchive;
-        public FileEntry(PboArchive parent,string filename, ulong type, ulong osize, ulong timestamp, ulong datasize, ulong unknown = 0x0)
-        {
-            _parentArchive = parent;
-            FileName = filename;
-            switch (type)
-            {
-                case 0x43707273:
-                    PackingMethod = PackingType.Packed;
-                    break;
-                case 0x0:
-                    PackingMethod = PackingType.Uncompressed;
-                    break;
-            }
-            OriginalSize = osize;
-            TimeStamp = timestamp;
-            DataSize = datasize;
-            Unknown = unknown;
-        }
-        public FileEntry(string filename, ulong type, ulong osize, ulong timestamp, ulong datasize, ulong unknown = 0x0)
-        {
-            FileName = filename;
-            switch (type)
-            {
-                case 0x43707273:
-                    PackingMethod = PackingType.Packed;
-                    break;
-                case 0x0:
-                    PackingMethod = PackingType.Uncompressed;
-                    break;
-            }
-            OriginalSize = osize;
-            TimeStamp = timestamp;
-            DataSize = datasize;
-            Unknown = unknown;
-        }
-        public Boolean Extract(string outpath)
-        {
-            if(_parentArchive == null)
-                throw  new Exception("No parent Archive");
-            if (!Directory.Exists(Path.GetDirectoryName(outpath)))
-                Directory.CreateDirectory(Path.GetDirectoryName(outpath));
-            return _parentArchive.Extract(this, outpath);
-        }
-
-        public Stream Extract()
-        {
-            if (_parentArchive == null)
-                throw new Exception("No parent Archive");
-            return _parentArchive.Extract(this);
-        }
-    }
 
     public class PboArchive
     {
-        private ProductEntry _productEntry;
+        private ProductEntry _productEntry = new ProductEntry("", "", "", new List<string>());
         private List<FileEntry> _files = new List<FileEntry>();
         private string _path;
         private Boolean _loaded = false;
@@ -131,7 +65,7 @@ namespace SwiftPbo
         private MemoryStream _memory;
         private byte[] _checksum;
 
-        public static Boolean Create(string directoryPath,string outpath, ProductEntry productEntry)
+        public static Boolean Create(string directoryPath, string outpath, ProductEntry productEntry)
         {
             var files = Directory.GetFiles(directoryPath, "*", SearchOption.AllDirectories);
             var entries = new List<FileEntry>();
@@ -140,7 +74,7 @@ namespace SwiftPbo
                 var info = new FileInfo(file);
                 var path = PboUtilities.GetRelativePath(info.FullName, directoryPath);
                 var entry = new FileEntry(path, 0x0, 0x0,
-                    (ulong) (DateTime.UtcNow.Subtract(new DateTime(1970, 1, 1))).TotalSeconds, (ulong) info.Length);
+                    (ulong)(DateTime.UtcNow.Subtract(new DateTime(1970, 1, 1))).TotalSeconds, (ulong)info.Length);
                 entries.Add(entry);
             }
             try
@@ -159,7 +93,7 @@ namespace SwiftPbo
                     foreach (var entry in entries)
                     {
                         var buffer = new byte[1024];
-                        using (var open = File.OpenRead(Path.Combine(directoryPath,entry.FileName)))
+                        using (var open = File.OpenRead(Path.Combine(directoryPath, entry.FileName)))
                         {
                             var read = 4324324;
                             while (read > 0)
@@ -173,10 +107,10 @@ namespace SwiftPbo
                     byte[] hash;
                     using (var sha1 = new SHA1Managed())
                     {
-                        hash  = sha1.ComputeHash(stream);
+                        hash = sha1.ComputeHash(stream);
                     };
                     stream.WriteByte(0x0);
-                    stream.Write(hash,0,20);
+                    stream.Write(hash, 0, 20);
                 }
             }
             catch (Exception e)
@@ -186,7 +120,8 @@ namespace SwiftPbo
             }
             return true;
         }
-        public static void Create(string path,ProductEntry productEntry,Dictionary<FileEntry,string> files,Byte[] checksum )
+
+        public static void Create(string path, ProductEntry productEntry, Dictionary<FileEntry, string> files, Byte[] checksum)
         {
             try
             {
@@ -195,7 +130,7 @@ namespace SwiftPbo
                     stream.WriteByte(0x0);
                     WriteProductEntry(productEntry, stream);
                     stream.WriteByte(0x0);
-                    files.Add(new FileEntry(null,"",0,0,0,0,0),"" );
+                    files.Add(new FileEntry(null, "", 0, 0, 0, 0, 0), "");
                     foreach (var entry in files.Keys)
                     {
                         WriteFileEntry(stream, entry);
@@ -212,18 +147,14 @@ namespace SwiftPbo
                                 read = open.Read(buffer, 0, buffer.Length);
                                 stream.Write(buffer, 0, read);
                             }
-                            
                         }
                     }
                     stream.WriteByte(0x0);
-                    stream.Write(checksum,0,checksum.Length);
-
-
+                    stream.Write(checksum, 0, checksum.Length);
                 }
             }
             catch (Exception)
             {
-                
                 throw;
             }
         }
@@ -239,26 +170,35 @@ namespace SwiftPbo
                     break;
             }
             PboUtilities.WriteLong(stream, packing);
-            PboUtilities.WriteLong(stream, (long) entry.OriginalSize);
+            PboUtilities.WriteLong(stream, (long)entry.OriginalSize);
             PboUtilities.WriteLong(stream, 0x0); // reserved
-            PboUtilities.WriteLong(stream, (long) entry.TimeStamp);
-            PboUtilities.WriteLong(stream, (long) entry.DataSize);
+            PboUtilities.WriteLong(stream, (long)entry.TimeStamp);
+            PboUtilities.WriteLong(stream, (long)entry.DataSize);
         }
 
         private static void WriteProductEntry(ProductEntry productEntry, FileStream stream)
         {
             PboUtilities.WriteString(stream, "sreV");
             stream.Write(new byte[15], 0, 15);
-            PboUtilities.WriteString(stream, productEntry.Prefix);
-            PboUtilities.WriteString(stream, productEntry.ProductName);
-            PboUtilities.WriteString(stream, productEntry.ProductVersion);
+            if (!String.IsNullOrEmpty(productEntry.Prefix))
+                PboUtilities.WriteString(stream, productEntry.Prefix);
+            else
+                return;
+            if (!String.IsNullOrEmpty(productEntry.ProductName))
+                PboUtilities.WriteString(stream, productEntry.ProductName);
+            else
+                return;
+            if (!String.IsNullOrEmpty(productEntry.ProductVersion))
+                PboUtilities.WriteString(stream, productEntry.ProductVersion);
+            else
+                return;
             foreach (var str in productEntry.Addtional)
             {
                 PboUtilities.WriteString(stream, str);
             }
         }
 
-        public PboArchive(String path,Boolean loadIntoMemory = false)
+        public PboArchive(String path, Boolean loadIntoMemory = false)
         {
             _loaded = loadIntoMemory;
             if (!File.Exists(path))
@@ -280,22 +220,21 @@ namespace SwiftPbo
                     _dataStart = stream.Position;
                     ReadChecksum(stream);
                     if (!loadIntoMemory) return;
-                    long length = stream.Length - (_dataStart+20);
+                    long length = stream.Length - (_dataStart + 20);
                     var buffer = new byte[length];
-                    stream.Read(buffer, 0, (int) length);
-                    _memory = new MemoryStream(buffer,true);
+                    stream.Read(buffer, 0, (int)length);
+                    _memory = new MemoryStream(buffer, true);
                 }
             }
             catch (Exception)
             {
-                
                 throw;
             }
         }
 
         private void ReadChecksum(FileStream stream)
         {
-            var pos = _dataStart + Files.Sum(fileEntry => (long) fileEntry.DataSize)+1;
+            var pos = _dataStart + Files.Sum(fileEntry => (long)fileEntry.DataSize) + 1;
             stream.Position = pos;
             _checksum = new byte[20];
             stream.Read(Checksum, 0, 20);
@@ -317,10 +256,14 @@ namespace SwiftPbo
             get { return _checksum; }
         }
 
+        public string PboPath
+        {
+            get { return _path; }
+        }
+
         private bool ReadEntry(FileStream stream)
         {
             var filename = PboUtilities.ReadString(stream);
-
 
             var packing = PboUtilities.ReadLong(stream);
 
@@ -330,7 +273,7 @@ namespace SwiftPbo
 
             var timestamp = PboUtilities.ReadLong(stream);
             var datasize = PboUtilities.ReadLong(stream);
-            var entry = new FileEntry(this,filename, packing, size, timestamp, datasize, unknown);
+            var entry = new FileEntry(this, filename, packing, size, timestamp, datasize, unknown);
             if (entry.FileName == "") return false;
             Files.Add(entry);
             return true;
@@ -338,53 +281,76 @@ namespace SwiftPbo
 
         private Boolean ReadHeader(FileStream stream)
         {
+            // TODO FIX SO BROKEN
             var str = PboUtilities.ReadString(stream);
             if (str != "sreV")
                 return false;
-            var ch = 0x0;
-            while (ch == 0x0)
+            int count = 0;
+            while (count < 15)
             {
-                ch = stream.ReadByte();
+                stream.ReadByte();
+                count++;
             }
-            var prefix = ((char)ch) + PboUtilities.ReadString(stream);
-            var pboname = PboUtilities.ReadString(stream);
-            var version = PboUtilities.ReadString(stream);
+            var prefix = "";
             var list = new List<string>();
-            while (stream.ReadByte() != 0x0)
+            var pboname = "";
+            var version = "";
+            prefix = PboUtilities.ReadString(stream);
+            if (!String.IsNullOrEmpty(prefix))
             {
-                stream.Position--;
-                var s = PboUtilities.ReadString(stream);
-                list.Add(s);
+                pboname = PboUtilities.ReadString(stream);
+                if (!String.IsNullOrEmpty(pboname))
+                {
+                    version = PboUtilities.ReadString(stream);
+
+                    if (!String.IsNullOrEmpty(version))
+                    {
+                        while (stream.ReadByte() != 0x0)
+                        {
+                            stream.Position--;
+                            var s = PboUtilities.ReadString(stream);
+                            list.Add(s);
+                        }
+                    }
+                }
             }
-            _productEntry = new ProductEntry(prefix,pboname,version,list); 
+            _productEntry = new ProductEntry(prefix, pboname, version, list);
+
             return true;
+        }
+
+        public Boolean ExtractAll(string outpath)
+        {
+            if (!Directory.Exists(Path.GetDirectoryName(outpath)))
+                Directory.CreateDirectory(Path.GetDirectoryName(outpath));
+            return _files.All(entry => Extract(entry, Path.Combine(outpath, entry.FileName)));
         }
 
         public Boolean Extract(FileEntry fileEntry, string outpath)
         {
             Stream mem = GetFileStream(fileEntry);
-            if(mem == null)
+            if (mem == null)
                 throw new Exception("WTF no stream");
             try
             {
-                    try
+                try
+                {
+                    if (!Directory.Exists(Path.GetDirectoryName(outpath)))
+                        Directory.CreateDirectory(Path.GetDirectoryName(outpath));
+                    using (var write = File.Create(outpath))
                     {
-                        using (var write = File.Create(outpath))
-                        {
-                            var buffer = new byte[fileEntry.DataSize];
-                            mem.Read(buffer, 0, buffer.Length);
-                            write.Write(buffer, 0, buffer.Length);
-                        }
+                        var buffer = new byte[fileEntry.DataSize];
+                        mem.Read(buffer, 0, buffer.Length);
+                        write.Write(buffer, 0, buffer.Length);
                     }
-                    catch (Exception)
-                    {
-                        
-                        throw;
-                    }
+                }
+                catch (Exception)
+                {
+                    throw;
+                }
             }
             catch (Exception)
             {
-                
                 throw;
             }
             mem.Close();
@@ -398,15 +364,15 @@ namespace SwiftPbo
                 mem = ExtractMemory(fileEntry);
             else
             {
-                mem = File.OpenRead(_path);
-                mem.Position = (long) GetFileStreamPos(fileEntry);
+                mem = File.OpenRead(PboPath);
+                mem.Position = (long)GetFileStreamPos(fileEntry);
             }
             return mem;
         }
 
         private ulong GetFileStreamPos(FileEntry fileEntry)
         {
-            ulong start = (ulong) _dataStart;
+            ulong start = (ulong)_dataStart;
             foreach (var entry in Files)
             {
                 if (entry == fileEntry)
@@ -415,6 +381,7 @@ namespace SwiftPbo
             }
             return start;
         }
+
         private long GetFileMemPos(FileEntry fileEntry)
         {
             ulong start = 0;
@@ -424,7 +391,7 @@ namespace SwiftPbo
                     break;
                 start += entry.DataSize;
             }
-            return (long) start;
+            return (long)start;
         }
 
         private Stream ExtractMemory(FileEntry fileEntry)
@@ -434,8 +401,8 @@ namespace SwiftPbo
             _memory.Read(buffer, 0, buffer.Length);
             _memory.Position = 0;
             return new MemoryStream(buffer);
-        
         }
+
         // returns a stream
         public Stream Extract(FileEntry fileEntry)
         {
@@ -454,7 +421,7 @@ namespace SwiftPbo
         }
     }
 
-    static class PboUtilities
+    internal static class PboUtilities
     {
         public static ulong ReadLong(Stream reader)
         {
@@ -463,17 +430,18 @@ namespace SwiftPbo
             return BitConverter.ToUInt32(buffer, 0);
         }
 
-        public static void WriteLong(Stream writer,long num)
+        public static void WriteLong(Stream writer, long num)
         {
             var buffer = BitConverter.GetBytes(num);
-            writer.Write(buffer,0,4);
+            writer.Write(buffer, 0, 4);
         }
+
         public static String ReadString(Stream reader)
         {
             var str = "";
             while (true)
             {
-                var ch = (char) reader.ReadByte();
+                var ch = (char)reader.ReadByte();
                 if (ch == 0x0)
                     break;
                 str += ch.ToString(CultureInfo.InvariantCulture);
@@ -483,13 +451,14 @@ namespace SwiftPbo
 
         public static void WriteString(FileStream stream, string str)
         {
-            var buffer = Encoding.ASCII.GetBytes(str+"\0");
-            stream.Write(buffer,0,buffer.Length);
+            var buffer = Encoding.ASCII.GetBytes(str + "\0");
+            stream.Write(buffer, 0, buffer.Length);
         }
+
         public static string GetRelativePath(string filespec, string folder)
         {
             Uri pathUri = new Uri(filespec);
-            
+
             // Folders must end in a slash
             if (!folder.EndsWith(Path.DirectorySeparatorChar.ToString()))
             {
