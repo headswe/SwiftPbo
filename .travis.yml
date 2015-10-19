@@ -2,4 +2,5 @@ language: csharp
 solution: SwiftPbo.sln
 script:    # the following commands are just examples, use whatever your build process requires
   - xbuild /p:Configuration=Debug SwiftPbo.sln
-  - mono PboTest/bin/Debug/PboTest.exe
+  - cd PboTest/bin/Debug
+  - mono PboTest.exe
