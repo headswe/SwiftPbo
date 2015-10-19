@@ -1,6 +1,7 @@
 language: csharp
 solution: SwiftPbo.sln
 script:    # the following commands are just examples, use whatever your build process requires
+  - sed -i 's/<SignAssembly>true<\/SignAssembly>/<SignAssembly>false<\/SignAssembly>/g' SwiftPbo/SwiftPbo.csproj
   - xbuild /p:Configuration=Debug SwiftPbo.sln
   - cd PboTest/bin/Debug
   - mono PboTest.exe
