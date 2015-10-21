@@ -121,7 +121,7 @@ namespace SwiftPbo
             return true;
         }
 
-        public static void Create(string path, ProductEntry productEntry, Dictionary<FileEntry, string> files, Byte[] checksum)
+        public static void Clone(string path, ProductEntry productEntry, Dictionary<FileEntry, string> files, Byte[] checksum)
         {
             try
             {
@@ -141,11 +141,11 @@ namespace SwiftPbo
                         var buffer = new byte[1024];
                         using (var open = File.OpenRead(file))
                         {
-                            var read = 4324324;
-                            while (read > 0)
+                            int bytesRead;
+                            while ((bytesRead =
+                                         open.Read(buffer, 0, 1024)) > 0)
                             {
-                                read = open.Read(buffer, 0, buffer.Length);
-                                stream.Write(buffer, 0, read);
+                                stream.Write(buffer, 0, bytesRead);
                             }
                         }
                     }
