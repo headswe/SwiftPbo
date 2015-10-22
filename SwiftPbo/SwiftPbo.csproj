@@ -47,6 +47,8 @@
   <ItemGroup>
     <Compile Include="FileEntry.cs" />
     <Compile Include="PboArchive.cs" />
+    <Compile Include="PboUtilities.cs" />
+    <Compile Include="ProductEntry.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

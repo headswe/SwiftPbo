@@ -1,54 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
-using System.Text;
 
 namespace SwiftPbo
 {
-    public class ProductEntry
-    {
-        private String _prefix;
-        private String _productName;
-        private String _productVersion;
-        private List<string> _addtional = new List<string>();
-
-        public ProductEntry(string prefix, string productName, string productVersion, List<string> addList = null)
-        {
-            Prefix = prefix;
-            ProductName = productName;
-            ProductVersion = productVersion;
-            if (addList != null)
-                Addtional = addList;
-        }
-
-        public string Prefix
-        {
-            get { return _prefix; }
-            set { _prefix = value; }
-        }
-
-        public string ProductName
-        {
-            get { return _productName; }
-            set { _productName = value; }
-        }
-
-        public string ProductVersion
-        {
-            get { return _productVersion; }
-            set { _productVersion = value; }
-        }
-
-        public List<string> Addtional
-        {
-            get { return _addtional; }
-            set { _addtional = value; }
-        }
-    }
-
     public enum PackingType
     {
         Uncompressed,
@@ -331,27 +288,13 @@ namespace SwiftPbo
             Stream mem = GetFileStream(fileEntry);
             if (mem == null)
                 throw new Exception("WTF no stream");
-            try
+            if (!Directory.Exists(Path.GetDirectoryName(outpath)))
+                Directory.CreateDirectory(Path.GetDirectoryName(outpath));
+            using (var write = File.Create(outpath))
             {
-                try
-                {
-                    if (!Directory.Exists(Path.GetDirectoryName(outpath)))
-                        Directory.CreateDirectory(Path.GetDirectoryName(outpath));
-                    using (var write = File.Create(outpath))
-                    {
-                        var buffer = new byte[fileEntry.DataSize];
-                        mem.Read(buffer, 0, buffer.Length);
-                        write.Write(buffer, 0, buffer.Length);
-                    }
-                }
-                catch (Exception)
-                {
-                    throw;
-                }
-            }
-            catch (Exception)
-            {
-                throw;
+                var buffer = new byte[fileEntry.DataSize];
+                mem.Read(buffer, 0, buffer.Length);
+                write.Write(buffer, 0, buffer.Length);
             }
             mem.Close();
             return true;
@@ -418,54 +361,6 @@ namespace SwiftPbo
                 mem.Position = 0;
                 return mem;
             }
-        }
-    }
-
-    internal static class PboUtilities
-    {
-        public static ulong ReadLong(Stream reader)
-        {
-            var buffer = new byte[4];
-            reader.Read(buffer, 0, 4);
-            return BitConverter.ToUInt32(buffer, 0);
-        }
-
-        public static void WriteLong(Stream writer, long num)
-        {
-            var buffer = BitConverter.GetBytes(num);
-            writer.Write(buffer, 0, 4);
-        }
-
-        public static String ReadString(Stream reader)
-        {
-            var str = "";
-            while (true)
-            {
-                var ch = (char)reader.ReadByte();
-                if (ch == 0x0)
-                    break;
-                str += ch.ToString(CultureInfo.InvariantCulture);
-            }
-            return str;
-        }
-
-        public static void WriteString(FileStream stream, string str)
-        {
-            var buffer = Encoding.ASCII.GetBytes(str + "\0");
-            stream.Write(buffer, 0, buffer.Length);
-        }
-
-        public static string GetRelativePath(string filespec, string folder)
-        {
-            Uri pathUri = new Uri(filespec);
-
-            // Folders must end in a slash
-            if (!folder.EndsWith(Path.DirectorySeparatorChar.ToString()))
-            {
-                folder += Path.DirectorySeparatorChar;
-            }
-            Uri folderUri = new Uri(folder);
-            return Uri.UnescapeDataString(folderUri.MakeRelativeUri(pathUri).ToString().Replace('/', Path.DirectorySeparatorChar));
         }
     }
 }

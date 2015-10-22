@@ -48,7 +48,7 @@ namespace PboTest
             }
             try
             {
-                PboArchive.Create(@"nottest.pbo", cake.ProductEntry, files, cake.Checksum);
+                PboArchive.Clone(@"nottest.pbo", cake.ProductEntry, files, cake.Checksum);
             }
             catch (Exception)
             {
