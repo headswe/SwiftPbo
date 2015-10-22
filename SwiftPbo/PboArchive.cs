@@ -17,23 +17,14 @@ namespace SwiftPbo
         private ProductEntry _productEntry = new ProductEntry("", "", "", new List<string>());
         private List<FileEntry> _files = new List<FileEntry>();
         private string _path;
-        private Boolean _loaded = false;
-        private long _dataStart = 0;
+        private long _dataStart;
         private MemoryStream _memory;
         private byte[] _checksum;
 
         public static Boolean Create(string directoryPath, string outpath, ProductEntry productEntry)
         {
             var files = Directory.GetFiles(directoryPath, "*", SearchOption.AllDirectories);
-            var entries = new List<FileEntry>();
-            foreach (var file in files)
-            {
-                var info = new FileInfo(file);
-                var path = PboUtilities.GetRelativePath(info.FullName, directoryPath);
-                var entry = new FileEntry(path, 0x0, 0x0,
-                    (ulong)(DateTime.UtcNow.Subtract(new DateTime(1970, 1, 1))).TotalSeconds, (ulong)info.Length);
-                entries.Add(entry);
-            }
+            var entries = (from file in files select new FileInfo(file) into info let path = PboUtilities.GetRelativePath(info.FullName, directoryPath) select new FileEntry(path, 0x0, 0x0, (ulong) (DateTime.UtcNow.Subtract(new DateTime(1970, 1, 1))).TotalSeconds, (ulong) info.Length)).ToList();
             try
             {
                 using (var stream = File.Create(outpath))
@@ -41,7 +32,7 @@ namespace SwiftPbo
                     stream.WriteByte(0x0);
                     WriteProductEntry(productEntry, stream);
                     stream.WriteByte(0x0);
-                    entries.Add(new FileEntry(null, "", 0, 0, 0, 0, 0));
+                    entries.Add(new FileEntry(null, "", 0, 0, 0, 0));
                     foreach (var entry in entries)
                     {
                         WriteFileEntry(stream, entry);
@@ -65,7 +56,7 @@ namespace SwiftPbo
                     using (var sha1 = new SHA1Managed())
                     {
                         hash = sha1.ComputeHash(stream);
-                    };
+                    }
                     stream.WriteByte(0x0);
                     stream.Write(hash, 0, 20);
                 }
@@ -157,7 +148,6 @@ namespace SwiftPbo
 
         public PboArchive(String path, Boolean loadIntoMemory = false)
         {
-            _loaded = loadIntoMemory;
             if (!File.Exists(path))
                 throw new FileNotFoundException("File not Found");
             _path = path;
@@ -285,6 +275,8 @@ namespace SwiftPbo
 
         public Boolean Extract(FileEntry fileEntry, string outpath)
         {
+            if(String.IsNullOrEmpty(outpath))
+                throw new NullReferenceException("Is null or empty");
             Stream mem = GetFileStream(fileEntry);
             if (mem == null)
                 throw new Exception("WTF no stream");
@@ -315,25 +307,13 @@ namespace SwiftPbo
 
         private ulong GetFileStreamPos(FileEntry fileEntry)
         {
-            ulong start = (ulong)_dataStart;
-            foreach (var entry in Files)
-            {
-                if (entry == fileEntry)
-                    break;
-                start += entry.DataSize;
-            }
-            return start;
+            var start = (ulong)_dataStart;
+            return Files.TakeWhile(entry => entry != fileEntry).Aggregate(start, (current, entry) => current + entry.DataSize);
         }
 
         private long GetFileMemPos(FileEntry fileEntry)
         {
-            ulong start = 0;
-            foreach (var entry in Files)
-            {
-                if (entry == fileEntry)
-                    break;
-                start += entry.DataSize;
-            }
+            ulong start = Files.TakeWhile(entry => entry != fileEntry).Aggregate<FileEntry, ulong>(0, (current, entry) => current + entry.DataSize);
             return (long)start;
         }
 

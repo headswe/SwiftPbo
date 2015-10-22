@@ -41,14 +41,14 @@ namespace SwiftPbo
 
         public static string GetRelativePath(string filespec, string folder)
         {
-            Uri pathUri = new Uri(filespec);
+            var pathUri = new Uri(filespec);
 
             // Folders must end in a slash
-            if (!folder.EndsWith(Path.DirectorySeparatorChar.ToString()))
+            if (!folder.EndsWith(Path.DirectorySeparatorChar.ToString(CultureInfo.InvariantCulture)))
             {
                 folder += Path.DirectorySeparatorChar;
             }
-            Uri folderUri = new Uri(folder);
+            var folderUri = new Uri(folder);
             return Uri.UnescapeDataString(folderUri.MakeRelativeUri(pathUri).ToString().Replace('/', Path.DirectorySeparatorChar));
         }
     }

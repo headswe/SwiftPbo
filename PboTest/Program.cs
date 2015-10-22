@@ -13,10 +13,10 @@ namespace PboTest
         private static int Main(string[] args)
         {
             var done = PboArchive.Create(new DirectoryInfo("indata").FullName, "testpbo.pbo",
-                new ProductEntry("prefix", "testpbo", "Head", new List<string>() { "SwiftPbo.dll" }));
+                new ProductEntry("prefix", "testpbo", "Head", new List<string> { "SwiftPbo.dll" }));
             if (!done)
                 return 1;
-            var inpath = "testpbo.pbo";
+            const string inpath = "testpbo.pbo";
             PboArchive cake;
             try
             {
