@@ -4,18 +4,26 @@ using System.IO;
 namespace SwiftPbo
 {
     [Serializable]
+    
     public class FileEntry
     {
+        
         public String FileName;
+        
         public PackingType PackingMethod = PackingType.Uncompressed;
+        
         public ulong OriginalSize;
+        
         public ulong TimeStamp;
+       
         public ulong Unknown;
+        
         public ulong DataSize;
         public override string ToString()
         {
             return String.Format("{0} ({1})", FileName, OriginalSize);
         }
+
         [NonSerialized]
         private readonly PboArchive _parentArchive;
         public FileEntry(PboArchive parent,string filename, ulong type, ulong osize, ulong timestamp, ulong datasize, ulong unknown = 0x0)

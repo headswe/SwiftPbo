@@ -40,7 +40,7 @@ namespace SwiftPbo
                     entries.Remove(entries.Last());
                     foreach (var entry in entries)
                     {
-                        var buffer = new byte[1024];
+                        var buffer = new byte[16384];
                         using (var open = File.OpenRead(Path.Combine(directoryPath, entry.FileName)))
                         {
                             var read = 4324324;
@@ -69,10 +69,12 @@ namespace SwiftPbo
             return true;
         }
 
-        public static void Clone(string path, ProductEntry productEntry, Dictionary<FileEntry, string> files, Byte[] checksum)
+        public static void Clone(string path, ProductEntry productEntry, Dictionary<FileEntry, string> files, Byte[] checksum = null)
         {
             try
             {
+                if (!Directory.Exists(Path.GetDirectoryName(path)) && !String.IsNullOrEmpty(Path.GetDirectoryName(path)))
+                    Directory.CreateDirectory(Path.GetDirectoryName(path) );
                 using (var stream = File.Create(path))
                 {
                     stream.WriteByte(0x0);
@@ -86,19 +88,34 @@ namespace SwiftPbo
                     files.Remove(files.Last().Key);
                     foreach (var file in files.Values)
                     {
-                        var buffer = new byte[1024];
+                        var buffer = new byte[16384];
+                        var len = new FileInfo(file).Length;
                         using (var open = File.OpenRead(file))
                         {
                             int bytesRead;
                             while ((bytesRead =
-                                         open.Read(buffer, 0, 1024)) > 0)
+                                         open.Read(buffer, 0, 16384)) > 0)
                             {
                                 stream.Write(buffer, 0, bytesRead);
                             }
                         }
                     }
-                    stream.WriteByte(0x0);
-                    stream.Write(checksum, 0, checksum.Length);
+                    if (checksum != null)
+                    {
+                        stream.WriteByte(0x0);
+                        stream.Write(checksum, 0, checksum.Length);
+                    }
+                    else
+                    {
+                        stream.Position = 0;
+                        byte[] hash;
+                        using (var sha1 = new SHA1Managed())
+                        {
+                            hash = sha1.ComputeHash(stream);
+                        }
+                        stream.WriteByte(0x0);
+                        stream.Write(hash, 0, 20);
+                    }
                 }
             }
             catch (Exception)
@@ -268,9 +285,29 @@ namespace SwiftPbo
 
         public Boolean ExtractAll(string outpath)
         {
-            if (!Directory.Exists(Path.GetDirectoryName(outpath)))
-                Directory.CreateDirectory(Path.GetDirectoryName(outpath));
-            return _files.All(entry => Extract(entry, Path.Combine(outpath, entry.FileName)));
+            if (!Directory.Exists(outpath))
+                Directory.CreateDirectory(outpath);
+            using (var stream = GetFileStream(Files.First()))
+            {
+                foreach (var file in Files)
+                {
+                    ulong totalread = file.DataSize;
+                    var pboPath = Path.Combine(outpath, file.FileName.Replace('\\',Path.DirectorySeparatorChar));
+                    if (!Directory.Exists(Path.GetDirectoryName(pboPath)))
+                        Directory.CreateDirectory(Path.GetDirectoryName(pboPath));
+                    using (var outfile = File.Create(pboPath))
+                    {
+                        while (totalread > 0)
+                        {
+                            var buffer = new byte[16384];
+                            var read = stream.Read(buffer, 0, (int)Math.Min(16384, totalread));
+                            outfile.Write(buffer,0,read);
+                            totalread -= (ulong) read;
+                        }
+                    }
+                }
+            }
+            return true;
         }
 
         public Boolean Extract(FileEntry fileEntry, string outpath)
@@ -282,11 +319,16 @@ namespace SwiftPbo
                 throw new Exception("WTF no stream");
             if (!Directory.Exists(Path.GetDirectoryName(outpath)))
                 Directory.CreateDirectory(Path.GetDirectoryName(outpath));
-            using (var write = File.Create(outpath))
+            var totalread = fileEntry.DataSize;
+            using (var outfile = File.OpenWrite(outpath))
             {
-                var buffer = new byte[fileEntry.DataSize];
-                mem.Read(buffer, 0, buffer.Length);
-                write.Write(buffer, 0, buffer.Length);
+                while (totalread > 0)
+                {
+                    var buffer = new byte[16384];
+                    var read = mem.Read(buffer, 0, (int)Math.Min(16384, totalread));
+                    outfile.Write(buffer, 0, read);
+                    totalread -= (ulong)read;
+                }
             }
             mem.Close();
             return true;

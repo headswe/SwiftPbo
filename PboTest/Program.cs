@@ -55,7 +55,8 @@ namespace PboTest
                 return 4;
             }
 
-            return !FilesAreEqual(new FileInfo(inpath), new FileInfo("nottest.pbo")) ? 5 : 0;
+            if (!FilesAreEqual(new FileInfo(inpath), new FileInfo("nottest.pbo"))) return 5;
+            return 0;
         }
 
         private const int BYTES_TO_READ = sizeof (Int64);
