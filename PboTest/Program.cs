@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -12,15 +13,20 @@ namespace PboTest
     {
         private static int Main(string[] args)
         {
-            var done = PboArchive.Create(new DirectoryInfo("indata").FullName, "testpbo.pbo",
-                new ProductEntry("prefix", "testpbo", "Head", new List<string> { "SwiftPbo.dll" }));
-            if (!done)
-                return 1;
-            const string inpath = "testpbo.pbo";
+
+         //   var done = PboArchive.Create(new DirectoryInfo("indata").FullName, "testpbo.pbo",
+        //        new ProductEntry("prefix", "testpbo", "Head", new List<string> { "SwiftPbo.dll" }));
+         //   if (!done)
+          //      return 1;
+            const string inpath = "hotze_mske.pbo";
+            Stopwatch watch = new Stopwatch();
             PboArchive cake;
             try
             {
-                cake = new PboArchive(inpath);
+                watch.Start();
+                cake = new PboArchive(inpath,false);
+                watch.Stop();
+                Console.WriteLine("Took {0}ms",watch.ElapsedMilliseconds);
             }
             catch (Exception e)
             {
@@ -28,34 +34,12 @@ namespace PboTest
                 return 2;
             }
 
-            var files = new Dictionary<FileEntry, string>();
-            foreach (var fileEntry in cake.Files)
-            {
-                var path = Path.Combine("output", fileEntry.FileName);
-                fileEntry.Extract(path);
-                files.Add(fileEntry, path);
-            }
-            var file = cake.Files[0];
-            try
-            {
-                var stream = file.Extract();
-                stream.Close();
-            }
-            catch (Exception)
-            {
-
-                return 3;
-            }
-            try
-            {
-                PboArchive.Clone(@"nottest.pbo", cake.ProductEntry, files, cake.Checksum);
-            }
-            catch (Exception)
-            {
-                return 4;
-            }
-
-            if (!FilesAreEqual(new FileInfo(inpath), new FileInfo("nottest.pbo"))) return 5;
+            watch.Reset();
+            watch.Start();
+            cake.ExtractAll("out");
+            cake.Dispose();
+            watch.Stop();
+            Console.WriteLine("Took {0}ms", watch.ElapsedMilliseconds);
             return 0;
         }
 

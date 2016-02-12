@@ -3,6 +3,7 @@ using System.Collections.Generic;
 
 namespace SwiftPbo
 {
+    [Serializable]
     public class ProductEntry
     {
         private String _prefix;

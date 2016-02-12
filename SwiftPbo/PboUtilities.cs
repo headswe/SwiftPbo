@@ -1,6 +1,8 @@
 using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
+using System.Linq;
 using System.Text;
 
 namespace SwiftPbo
@@ -25,17 +27,18 @@ namespace SwiftPbo
             var str = "";
             while (true)
             {
-                var ch = (char)reader.ReadByte();
+                var ch = (byte) reader.ReadByte();
                 if (ch == 0x0)
                     break;
-                str += ch.ToString(CultureInfo.InvariantCulture);
+                str += (char)ch;
             }
+           
             return str;
         }
 
         public static void WriteString(FileStream stream, string str)
         {
-            var buffer = Encoding.ASCII.GetBytes(str + "\0");
+            var buffer = Encoding.UTF8.GetBytes(str + "\0");
             stream.Write(buffer, 0, buffer.Length);
         }
 
@@ -50,6 +53,28 @@ namespace SwiftPbo
             }
             var folderUri = new Uri(folder);
             return Uri.UnescapeDataString(folderUri.MakeRelativeUri(pathUri).ToString().Replace('/', Path.DirectorySeparatorChar));
+        }
+
+        public static Byte[] ReadStringArray(Stream reader)
+        {
+            var list = new List<Byte>();
+            while (true)
+            {
+                var ch =  (byte)reader.ReadByte();
+                if (ch == 0x0)
+                    break;
+                list.Add((byte) ch);
+            }
+           
+            return list.ToArray();
+        }
+
+        public static void WriteASIIZ(FileStream stream, Byte[] fileName)
+        {
+            var copy = new Byte[fileName.Count()+1];
+            fileName.CopyTo(copy,0);
+            copy[fileName.Length] = 0x0;
+            stream.Write(copy, 0, copy.Length);
         }
     }
 }

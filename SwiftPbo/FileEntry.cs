@@ -7,8 +7,7 @@ namespace SwiftPbo
     
     public class FileEntry
     {
-        
-        public String FileName;
+        public String _fileName;
         
         public PackingType PackingMethod = PackingType.Uncompressed;
         
@@ -19,23 +18,40 @@ namespace SwiftPbo
         public ulong Unknown;
         
         public ulong DataSize;
+
+        public string FileName
+        {
+            get
+            {
+                return _fileName;
+            }
+            set { _fileName = value; }
+        }
+
         public override string ToString()
         {
-            return String.Format("{0} ({1})", FileName, OriginalSize);
+            return String.Format("{0} ({1})", _fileName, OriginalSize);
         }
 
         [NonSerialized]
         private readonly PboArchive _parentArchive;
-        public FileEntry(PboArchive parent,string filename, ulong type, ulong osize, ulong timestamp, ulong datasize, ulong unknown = 0x0)
+
+        public byte[] OrgName;
+
+        public FileEntry(PboArchive parent, string filename, ulong type, ulong osize, ulong timestamp, ulong datasize, byte[] file, ulong unknown = 0x0)
         {
             _parentArchive = parent;
-            FileName = filename;
+            _fileName = filename;
+            OrgName = file;
             switch (type)
             {
                 case 0x43707273:
                     PackingMethod = PackingType.Packed;
                     break;
                 case 0x0:
+                    PackingMethod = PackingType.Uncompressed;
+                    break;
+                case 0x56657273:
                     PackingMethod = PackingType.Uncompressed;
                     break;
             }
@@ -46,7 +62,7 @@ namespace SwiftPbo
         }
         public FileEntry(string filename, ulong type, ulong osize, ulong timestamp, ulong datasize, ulong unknown = 0x0)
         {
-            FileName = filename;
+            _fileName = filename;
             switch (type)
             {
                 case 0x43707273:
