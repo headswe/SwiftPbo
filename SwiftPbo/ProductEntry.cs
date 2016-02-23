@@ -11,6 +11,11 @@ namespace SwiftPbo
         private String _productVersion;
         private List<string> _addtional = new List<string>();
 
+        public ProductEntry()
+        {
+            _prefix = _productName = _productVersion = "";
+            Addtional = new List<string>();
+        }
         public ProductEntry(string prefix, string productName, string productVersion, List<string> addList = null)
         {
             Prefix = prefix;

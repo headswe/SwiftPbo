@@ -26,10 +26,42 @@ namespace SwiftPbo
 
         private static readonly List<char> InvaildFile = Path.GetInvalidFileNameChars().ToList();
 
+        public static Boolean Create(string directoryPath, string outpath)
+        {
+            var entry = new ProductEntry("","","",new List<string>());
+            var files = Directory.GetFiles(directoryPath, "$*$");
+            foreach (var file in files)
+            {
+                var varname = Path.GetFileNameWithoutExtension(file).Trim('$');
+                var data = File.ReadAllText(file).Split('\n')[0];
+                entry.Prefix = "prefix";
+                switch (varname.ToLowerInvariant())
+                {
+                    case "pboprefix":
+                        entry.ProductName = data;
+                        break;
+                    case "version":
+                        entry.ProductVersion = data;
+                        break;
+                    default:
+                        entry.Addtional.Add(data);
+                        break;
+                }
+            }
+            return Create(directoryPath, outpath, entry);
+        }
         public static Boolean Create(string directoryPath, string outpath, ProductEntry productEntry)
         {
             var files = Directory.GetFiles(directoryPath, "*", SearchOption.AllDirectories);
-            var entries = (from file in files select new FileInfo(file) into info let path = PboUtilities.GetRelativePath(info.FullName, directoryPath) select new FileEntry(path, 0x0, 0x0, (ulong) (DateTime.UtcNow.Subtract(new DateTime(1970, 1, 1))).TotalSeconds, (ulong) info.Length)).ToList();
+            var entries = new List<FileEntry>();
+            foreach (string file in files)
+            {
+                if(Path.GetFileName(file).StartsWith("$") && Path.GetFileName(file).EndsWith("$"))
+                    continue;
+                FileInfo info = new FileInfo(file);
+                string path = PboUtilities.GetRelativePath(info.FullName, directoryPath);
+                entries.Add(new FileEntry(path, 0x0, (ulong) info.Length, (ulong) (DateTime.UtcNow.Subtract(new DateTime(1970, 1, 1))).TotalSeconds, (ulong) info.Length));
+            }
             try
             {
                 using (var stream = File.Create(outpath))
