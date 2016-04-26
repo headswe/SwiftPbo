@@ -34,11 +34,10 @@ namespace SwiftPbo
             {
                 var varname = Path.GetFileNameWithoutExtension(file).Trim('$');
                 var data = File.ReadAllText(file).Split('\n')[0];
-                entry.Prefix = "prefix";
                 switch (varname.ToLowerInvariant())
                 {
                     case "pboprefix":
-                        entry.ProductName = data;
+                        entry.Prefix = data;
                         break;
                     case "version":
                         entry.ProductVersion = data;
