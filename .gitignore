@@ -5,3 +5,6 @@
 /SwiftPbo/*.snk
 Release
 ConsoleApplication1
+bin
+obj
+packages

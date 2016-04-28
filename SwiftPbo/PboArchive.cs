@@ -28,16 +28,22 @@ namespace SwiftPbo
 
         public static Boolean Create(string directoryPath, string outpath)
         {
-            var entry = new ProductEntry("","","",new List<string>());
+            var dir = new DirectoryInfo(directoryPath);
+            if (!dir.Exists)
+                throw new DirectoryNotFoundException();
+            directoryPath = dir.FullName;
+            var entry = new ProductEntry("prefix","","",new List<string>());
             var files = Directory.GetFiles(directoryPath, "$*$");
             foreach (var file in files)
             {
                 var varname = Path.GetFileNameWithoutExtension(file).Trim('$');
                 var data = File.ReadAllText(file).Split('\n')[0];
-                entry.Name = "prefix";
                 switch (varname.ToLowerInvariant())
                 {
                     case "pboprefix":
+                        entry.Prefix = data;
+                        break;
+                    case "prefix":
                         entry.Prefix = data;
                         break;
                     case "version":
@@ -52,6 +58,10 @@ namespace SwiftPbo
         }
         public static Boolean Create(string directoryPath, string outpath, ProductEntry productEntry)
         {
+            var dir = new DirectoryInfo(directoryPath);
+            if (!dir.Exists)
+                throw new DirectoryNotFoundException();
+            directoryPath = dir.FullName;
             var files = Directory.GetFiles(directoryPath, "*", SearchOption.AllDirectories);
             var entries = new List<FileEntry>();
             foreach (string file in files)
