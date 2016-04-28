@@ -7,4 +7,4 @@ before_script:
   - sed -i 's/<SignAssembly>true<\/SignAssembly>/<SignAssembly>false<\/SignAssembly>/g' SwiftPbo/SwiftPbo.csproj
   - nuget restore SwiftPbo.sln
 after_script:
-  - nunit-console SwiftPbo.Tests\bin\Debug\SwiftPbo.Tests.dll
+  - nunit-console SwiftPbo.Tests/bin/Debug/SwiftPbo.Tests.dll
