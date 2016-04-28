@@ -6,35 +6,35 @@ namespace SwiftPbo
     [Serializable]
     public class ProductEntry
     {
+        private String _name;
         private String _prefix;
-        private String _productName;
         private String _productVersion;
         private List<string> _addtional = new List<string>();
 
         public ProductEntry()
         {
-            _prefix = _productName = _productVersion = "";
+            _name = _prefix = _productVersion = "";
             Addtional = new List<string>();
         }
-        public ProductEntry(string prefix, string productName, string productVersion, List<string> addList = null)
+        public ProductEntry(string name, string prefix, string productVersion, List<string> addList = null)
         {
+            Name = name;
             Prefix = prefix;
-            ProductName = productName;
             ProductVersion = productVersion;
             if (addList != null)
                 Addtional = addList;
+        }
+
+        public string Name
+        {
+            get { return _name; }
+            set { _name = value; }
         }
 
         public string Prefix
         {
             get { return _prefix; }
             set { _prefix = value; }
-        }
-
-        public string ProductName
-        {
-            get { return _productName; }
-            set { _productName = value; }
         }
 
         public string ProductVersion

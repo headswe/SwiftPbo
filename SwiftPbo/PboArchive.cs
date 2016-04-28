@@ -34,11 +34,11 @@ namespace SwiftPbo
             {
                 var varname = Path.GetFileNameWithoutExtension(file).Trim('$');
                 var data = File.ReadAllText(file).Split('\n')[0];
-                entry.Prefix = "prefix";
+                entry.Name = "prefix";
                 switch (varname.ToLowerInvariant())
                 {
                     case "pboprefix":
-                        entry.ProductName = data;
+                        entry.Prefix = data;
                         break;
                     case "version":
                         entry.ProductVersion = data;
@@ -111,6 +111,7 @@ namespace SwiftPbo
 
         public static String SterilizePath(String path)
         {
+            
             var arr = Path.GetDirectoryName(path).ToCharArray();
             var builder = new StringBuilder(arr.Count());
             string dirpath = Path.GetDirectoryName(path);
@@ -125,7 +126,7 @@ namespace SwiftPbo
             for (int i = 0; i < filename.Length; i++)
             {
                 var ch = filename[i];
-                if (!InvaildFile.Contains(ch) && ch != '*')
+                if (!InvaildFile.Contains(ch) && ch != '*' && !IsLiteral(ch))
                 {
                     continue;
                 }
@@ -133,6 +134,13 @@ namespace SwiftPbo
             }
             return Path.Combine(builder.ToString(), new string(filename));
         }
+
+        private static List<char> _literalList = new List<char>() {'\'','\"','\\','\0','\a','\b','\f','\n','\r','\t','\v'};
+        private static bool IsLiteral(char ch)
+        {
+            return _literalList.Contains(ch);
+        }
+
         public static void Clone(string path, ProductEntry productEntry, Dictionary<FileEntry, string> files, byte[] checksum = null)
         {
             try
@@ -211,12 +219,12 @@ namespace SwiftPbo
         {
             PboUtilities.WriteString(stream, "sreV");
             stream.Write(new byte[15], 0, 15);
-            if (!String.IsNullOrEmpty(productEntry.Prefix))
-                PboUtilities.WriteString(stream, productEntry.Prefix);
+            if (!String.IsNullOrEmpty(productEntry.Name))
+                PboUtilities.WriteString(stream, productEntry.Name);
             else
                 return;
-            if (!String.IsNullOrEmpty(productEntry.ProductName))
-                PboUtilities.WriteString(stream, productEntry.ProductName);
+            if (!String.IsNullOrEmpty(productEntry.Prefix))
+                PboUtilities.WriteString(stream, productEntry.Prefix);
             else
                 return;
             if (!String.IsNullOrEmpty(productEntry.ProductVersion))
@@ -291,7 +299,7 @@ namespace SwiftPbo
         private bool ReadEntry(FileStream stream)
         {
             var file = PboUtilities.ReadStringArray(stream);
-            var filename = Encoding.UTF8.GetString(file);
+            var filename = Encoding.UTF8.GetString(file).Replace("\t","\\t");
 
             var packing = PboUtilities.ReadLong(stream);
 
