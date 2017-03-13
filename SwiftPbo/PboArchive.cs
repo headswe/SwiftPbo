@@ -199,9 +199,9 @@ namespace SwiftPbo
                     }
                 }
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                throw;
+                throw ex;
             }
         }
 
@@ -309,7 +309,7 @@ namespace SwiftPbo
         private bool ReadEntry(FileStream stream)
         {
             var file = PboUtilities.ReadStringArray(stream);
-            var filename = Encoding.UTF8.GetString(file).Replace("\t","\\t");
+            var filename = PboUtilities.TextEncoding.GetString(file).Replace("\t", "\\t");
 
             var packing = PboUtilities.ReadLong(stream);
 
@@ -398,7 +398,10 @@ namespace SwiftPbo
                         }
                     }
                     Console.WriteLine("FILE END " + files);
+                    if (_stream == null)
+                        stream.Close();
                 }
+
             return true;
         }
 

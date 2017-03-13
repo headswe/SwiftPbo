@@ -1,8 +1,9 @@
 language: csharp
 solution: SwiftPbo.sln
-script:
-  - sudo apt-get install nunit-console
-  - sed -i 's/<SignAssembly>true<\/SignAssembly>/<SignAssembly>false<\/SignAssembly>/g' SwiftPbo/SwiftPbo.csproj
+install:
+  - nuget install NUnit.Runners -OutputDirectory testrunner -Version 3.6.1
   - nuget restore SwiftPbo.sln
+script:
+  - sed -i 's/<SignAssembly>true<\/SignAssembly>/<SignAssembly>false<\/SignAssembly>/g' SwiftPbo/SwiftPbo.csproj
   - xbuild /p:Configuration=Debug SwiftPbo.sln
-  - nunit-console SwiftPbo.Tests/bin/Debug/SwiftPbo.Tests.dll
+  - mono ./testrunner/NUnit.ConsoleRunner.3.6.1/tools/nunit3-console.exe ./SwiftPbo.Tests/bin/Debug/SwiftPbo.Tests.dll
