@@ -399,6 +399,8 @@ namespace SwiftPbo
                     }
                     Console.WriteLine("FILE END " + files);
                 }
+                if (_stream == null)
+                    stream.Close();
             return true;
         }
 
