@@ -138,18 +138,17 @@ namespace SwiftPbo.Tests
                 Console.WriteLine("Working out output path: " + tempFolder);
                 string outPath = Path.Combine(outFolder, pboNameNoExt + "_clone.pbo");
                 Console.WriteLine("Extracting to " + outPath);
-                pboArchive.ExtractAll(tempFolder);
+
+
+
 
                 var files = new Dictionary<FileEntry, string>();
 
                 foreach (var entry in pboArchive.Files)
                 {
                     Console.WriteLine("Adding " + entry.FileName);
-                    string filename = GetFileName(entry);
-                    var info = new FileInfo(Path.Combine(tempFolder, filename));
 
-                    Console.WriteLine("Checking info exists for " + filename);
-                    Assert.That(info.Exists);
+                    var info = new FileInfo(Path.Combine(tempFolder, entry.FileName));
 
                     Console.WriteLine("Creating/adding " + entry.FileName);
                     files.Add(new FileEntry(entry.FileName,
@@ -159,8 +158,11 @@ namespace SwiftPbo.Tests
                         entry.DataSize,
                         entry.Unknown),
                         info.FullName);
+                    entry.FileName = GetFileName(entry);
                 }
 
+
+                pboArchive.ExtractAll(tempFolder);
 
                 Console.WriteLine("Cloning to " + outPath);
                 PboArchive.Clone(outPath, pboArchive.ProductEntry, files, pboArchive.Checksum);
