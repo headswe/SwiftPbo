@@ -187,7 +187,10 @@ namespace SwiftPbo.Tests
                 entrypath = entrypath.Remove(0, 1);
             var patharray = path.Split(new[] { '\\', '/' }).ToList();
             patharray.Add(entrypath);
-            return Path.Combine(patharray.ToArray());
+            string ret = Path.Combine(patharray.ToArray());
+            if (IsLinux)
+                ret = ret.Replace('\\', '/');
+            return ret;
         }
         public ulong GetPackingMethod(PackingType type)
         {
