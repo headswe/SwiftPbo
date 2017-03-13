@@ -3,13 +3,14 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text;
 
 namespace SwiftPbo.Tests
 {
     [TestFixture]
     class PboTest
     {
-        public static bool IsLinux
+        public bool IsLinux
         {
             get
             {
