@@ -309,7 +309,7 @@ namespace SwiftPbo
         private bool ReadEntry(FileStream stream)
         {
             var file = PboUtilities.ReadStringArray(stream);
-            var filename = Encoding.UTF8.GetString(file).Replace("\t","\\t");
+            var filename = Encoding.Default.GetString(file).Replace("\t", "\\t");
 
             var packing = PboUtilities.ReadLong(stream);
 
@@ -398,9 +398,10 @@ namespace SwiftPbo
                         }
                     }
                     Console.WriteLine("FILE END " + files);
+                    if (_stream == null)
+                        stream.Close();
                 }
-                if (_stream == null)
-                    stream.Close();
+
             return true;
         }
 
@@ -428,18 +429,7 @@ namespace SwiftPbo
             return true;
         }
 
-        public byte[] GetMD5(FileEntry fileEntry)
-        {
-            var md5 = System.Security.Cryptography.MD5.Create();
-            var fileStream = GetFileStream(fileEntry);
-            byte[] data = new byte[fileEntry.DataSize];
-            var stream = GetFileStream(fileEntry);
-            stream.Read(data, 0, (int)fileEntry.DataSize);
-            var hash = md5.ComputeHash(data);
-            stream.Close();
-            return hash;
-        }
-        public Stream GetFileStream(FileEntry fileEntry)
+        private Stream GetFileStream(FileEntry fileEntry)
         {
             if (_stream != null)
             {
