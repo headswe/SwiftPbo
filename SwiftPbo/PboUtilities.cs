@@ -9,6 +9,8 @@ namespace SwiftPbo
 {
     internal static class PboUtilities
     {
+        public static Encoding TextEncoding = Encoding.GetEncoding(1252);
+
         public static ulong ReadLong(Stream reader)
         {
             var buffer = new byte[4];
@@ -40,7 +42,7 @@ namespace SwiftPbo
 
         public static void WriteString(FileStream stream, string str)
         {
-            var buffer = Encoding.Default.GetBytes(str + "\0");
+            var buffer = TextEncoding.GetBytes(str + "\0");
             stream.Write(buffer, 0, buffer.Length);
         }
 

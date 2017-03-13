@@ -309,7 +309,7 @@ namespace SwiftPbo
         private bool ReadEntry(FileStream stream)
         {
             var file = PboUtilities.ReadStringArray(stream);
-            var filename = Encoding.Default.GetString(file).Replace("\t", "\\t");
+            var filename = PboUtilities.TextEncoding.GetString(file).Replace("\t", "\\t");
 
             var packing = PboUtilities.ReadLong(stream);
 

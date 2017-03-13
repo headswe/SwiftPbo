@@ -124,7 +124,7 @@ namespace SwiftPbo.Tests
                     var info = new FileInfo(Path.Combine(tempFolder, entry.FileName));
                     Assert.That(info.Exists);
 
-                    files.Add(new FileEntry(Encoding.Default.GetString(entry.OrgName),
+                    files.Add(new FileEntry(Encoding.GetEncoding(1252).GetString(entry.OrgName),
                         GetPackingMethod(entry.PackingMethod),
                         entry.OriginalSize,
                         entry.TimeStamp,
