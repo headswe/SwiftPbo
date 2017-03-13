@@ -27,8 +27,10 @@ namespace SwiftPbo
             var str = "";
             while (true)
             {
-                var ch = (byte) reader.ReadByte();
-                if (ch == 0x0)
+                var ch = reader.ReadByte();
+                if (ch == -1)
+                    throw new Exception("Error reading string array. File too short.");
+                if ((byte)ch == 0x0)
                     break;
                 str += (char)ch;
             }
