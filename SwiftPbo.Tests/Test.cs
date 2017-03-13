@@ -1,9 +1,8 @@
-﻿using System;
+﻿using NUnit.Framework;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
-using NUnit.Framework;
 
 namespace SwiftPbo.Tests
 {
@@ -30,7 +29,7 @@ namespace SwiftPbo.Tests
 
 
 
-            Assert.That(pboArchive.Checksum.SequenceEqual(_checksum),"Checksum dosen't match");
+            Assert.That(pboArchive.Checksum.SequenceEqual(_checksum), "Checksum dosen't match");
 
             Assert.That(pboArchive.ProductEntry.Name == "prefix");
 
@@ -42,7 +41,7 @@ namespace SwiftPbo.Tests
         [Test]
         public void CreateArchiveTest()
         {
-            Assert.That(PboArchive.Create("testdata\\cba_common","cba_common.pbo"));
+            Assert.That(PboArchive.Create("testdata\\cba_common", "cba_common.pbo"));
 
             var pbo = new PboArchive("cba_common.pbo");
 
@@ -66,9 +65,9 @@ namespace SwiftPbo.Tests
 
             foreach (var entry in pboArchive.Files)
             {
-                var info = new FileInfo(Path.Combine("testdata\\cba_common",entry.FileName));
+                var info = new FileInfo(Path.Combine("testdata/cba_common", entry.FileName));
                 Assert.That(info.Exists);
-                files.Add(entry,info.FullName);
+                files.Add(entry, info.FullName);
             }
 
 
