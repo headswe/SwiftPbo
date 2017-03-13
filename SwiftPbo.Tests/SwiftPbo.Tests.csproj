@@ -384,6 +384,9 @@
     <None Include="testdata\cba_common\XEH_preInit.sqf">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Include="testdata\rhs_t72_encoding_issue.pbo">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\SwiftPbo\SwiftPbo.csproj">
