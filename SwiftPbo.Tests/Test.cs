@@ -68,9 +68,12 @@ namespace SwiftPbo.Tests
         [Test]
         public void CreateArchiveTest()
         {
-            Assert.That(PboArchive.Create(Path.Combine(TestFolder, "cba_common"), Path.Combine(TestFolder, "out", "cba_common.pbo")));
+            var outFolder = Path.Combine(TestFolder, "out1");
+            if (!Directory.Exists(outFolder))
+                Directory.CreateDirectory(outFolder);
+            Assert.That(PboArchive.Create(Path.Combine(TestFolder, "cba_common"), Path.Combine(outFolder, "cba_common.pbo")));
 
-            var pbo = new PboArchive(Path.Combine(TestFolder, "out", "cba_common.pbo"));
+            var pbo = new PboArchive(Path.Combine(outFolder, "cba_common.pbo"));
 
             Assert.That(pbo.Files.Count == 113);
 
@@ -119,7 +122,7 @@ namespace SwiftPbo.Tests
         public void CloneAllArchivesTest()
         {
             var testfiles = Directory.GetFiles(TestFolder, "*.pbo");
-            string outFolder = Path.Combine(TestFolder, "out");
+            string outFolder = Path.Combine(TestFolder, "out2");
             foreach (var pboPath in testfiles)
             {
                 string pboName = Path.GetFileName(pboPath);
@@ -150,9 +153,9 @@ namespace SwiftPbo.Tests
 
                 var cloneArchive = new PboArchive(outPath);
 
-                Console.WriteLine("Checking if Files dosen't match - " + pboName);
-                FileAssert.AreEqual(pboPath, outPath, "Files dosen't match - " + pboName);
 
+                FileAssert.AreEqual(pboPath, outPath, "Files dosen't match - " + pboName);
+                Console.WriteLine("Checked Files match - " + pboName);
             }
         }
 
