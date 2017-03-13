@@ -145,13 +145,13 @@ namespace SwiftPbo.Tests
                 foreach (var entry in pboArchive.Files)
                 {
                     Console.WriteLine("Adding " + entry.FileName);
-                    var info = new FileInfo(Path.Combine(tempFolder, entry.FileName));
+                    var info = new FileInfo(Path.Combine(tempFolder, GetFileName(entry)));
 
                     Console.WriteLine("Checking info exists for " + entry.FileName);
                     Assert.That(info.Exists);
 
                     Console.WriteLine("Creating/adding " + entry.FileName);
-                    files.Add(new FileEntry(Encoding.GetEncoding(1252).GetString(entry.OrgName),
+                    files.Add(new FileEntry(entry.FileName,
                         GetPackingMethod(entry.PackingMethod),
                         entry.OriginalSize,
                         entry.TimeStamp,
@@ -173,6 +173,13 @@ namespace SwiftPbo.Tests
             }
         }
 
+        public string GetFileName(FileEntry entry)
+        {
+            if (IsLinux)
+                return Encoding.UTF8.GetString(entry.OrgName);
+            else
+                return entry.FileName;
+        }
         public ulong GetPackingMethod(PackingType type)
         {
 
