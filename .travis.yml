@@ -7,4 +7,4 @@ script:
   - sed -i 's/<SignAssembly>true<\/SignAssembly>/<SignAssembly>false<\/SignAssembly>/g' SwiftPbo/SwiftPbo.csproj
   - xbuild /p:Configuration=Debug SwiftPbo.sln
   - mono ./testrunner/NUnit.ConsoleRunner.3.6.1/tools/nunit3-console.exe ./SwiftPbo.Tests/bin/Debug/SwiftPbo.Tests.dll
-  - ls /home/travis/build/LecksC/SwiftPbo/SwiftPbo.Tests/bin/Debug/testdata/rhs_t72_encoding_issue/data/anim
+  - ls -R /home/travis/build/LecksC/SwiftPbo/SwiftPbo.Tests/bin/Debug/
