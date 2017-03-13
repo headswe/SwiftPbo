@@ -121,34 +121,21 @@ namespace SwiftPbo.Tests
         [Test]
         public void CloneAllArchivesTest()
         {
-            Console.WriteLine("Getting Pbos");
             var testfiles = Directory.GetFiles(TestFolder, "*.pbo");
-            Console.WriteLine("Getting Output Folder");
             string outFolder = Path.Combine(TestFolder, "out2");
             foreach (var pboPath in testfiles)
             {
-                Console.WriteLine("Starting " + pboPath);
                 string pboName = Path.GetFileName(pboPath);
-                Console.WriteLine("Working out archive name: " + pboPath);
                 var pboArchive = new PboArchive(Path.Combine(TestFolder, pboName));
-                Console.WriteLine("Remove extension: " + pboArchive);
                 var pboNameNoExt = pboName.Substring(0, pboName.Length - 4);
-                Console.WriteLine("Working out temp folder: " + pboNameNoExt);
                 string tempFolder = Path.Combine(TestFolder, pboNameNoExt);
-                Console.WriteLine("Working out output path: " + tempFolder);
                 string outPath = Path.Combine(outFolder, pboNameNoExt + "_clone.pbo");
-                Console.WriteLine("Extracting to " + outPath);
-
-
-
 
                 var files = new Dictionary<FileEntry, string>();
 
                 foreach (var entry in pboArchive.Files)
                 {
-                    Console.WriteLine("Adding " + entry.FileName);
                     string outfile = Path.Combine(tempFolder, GetFileName(entry));
-                    var info = new FileInfo(outfile);
 
                     Console.WriteLine("Creating/adding " + outfile);
                     files.Add(new FileEntry(entry.FileName,
@@ -158,19 +145,16 @@ namespace SwiftPbo.Tests
                         entry.DataSize,
                         entry.Unknown),
                         outfile);
+
+                    //Set the file name so it's extracted to the correct path. Doesn't exist in 'files' array.
                     entry.FileName = outfile;
                 }
-
-
+                // Extract the PBO so all the correct files exist.
                 pboArchive.ExtractAll(tempFolder);
-
-                Console.WriteLine("Cloning to " + outPath);
                 PboArchive.Clone(outPath, pboArchive.ProductEntry, files, pboArchive.Checksum);
-
-                Console.WriteLine("Opening " + outPath);
                 var cloneArchive = new PboArchive(outPath);
 
-                Console.WriteLine("Checking Files match - " + pboName);
+                //Compare the entire pbo
                 FileAssert.AreEqual(pboPath, outPath, "Files dosen't match - " + pboName);
 
             }
@@ -178,21 +162,26 @@ namespace SwiftPbo.Tests
 
         public string GetFileName(FileEntry entry)
         {
-            //UTF encoding for saved path
-            string path = Path.GetDirectoryName(entry.FileName);
-            int fileStartIndex = path.Length;
-
-            string entrypath = Encoding.UTF8.GetString(entry.OrgName.Skip(fileStartIndex).Take(entry.OrgName.Length - fileStartIndex).ToArray());
-            if (entrypath.StartsWith("\\") || entrypath.StartsWith("/"))
-                entrypath = entrypath.Remove(0, 1);
-            if (entrypath.StartsWith("\\") || entrypath.StartsWith("/"))
-                entrypath = entrypath.Remove(0, 1);
-            var patharray = path.Split(new[] { '\\', '/' }).ToList();
-            patharray.Add(entrypath);
-            string ret = Path.Combine(patharray.ToArray());
+            // Fix Linux folders for output to filesystem.
             if (IsLinux)
-                ret = ret.Replace('\\', '/');
-            return ret;
+            {
+                string path = Path.GetDirectoryName(entry.FileName);
+                int fileStartIndex = path.Length;
+
+                string entrypath = Encoding.UTF8.GetString(entry.OrgName.Skip(fileStartIndex).Take(entry.OrgName.Length - fileStartIndex).ToArray());
+                if (entrypath.StartsWith("\\") || entrypath.StartsWith("/"))
+                    entrypath = entrypath.Remove(0, 1);
+                if (entrypath.StartsWith("\\") || entrypath.StartsWith("/"))
+                    entrypath = entrypath.Remove(0, 1);
+                var patharray = path.Split(new[] { '\\', '/' }).ToList();
+                patharray.Add(entrypath);
+                return Path.Combine(patharray.ToArray()).Replace('\\', '/');
+            }
+            else
+            {
+                return entry.FileName;
+            }
+
         }
         public ulong GetPackingMethod(PackingType type)
         {
