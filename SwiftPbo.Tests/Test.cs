@@ -10,7 +10,7 @@ namespace SwiftPbo.Tests
     [TestFixture]
     class PboTest
     {
-        public bool IsLinux
+        public static bool IsLinux
         {
             get
             {
