@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 
 namespace SwiftPbo.Tests
@@ -18,11 +19,21 @@ namespace SwiftPbo.Tests
                 return (p == 4) || (p == 6) || (p == 128);
             }
         }
+        public static string AssemblyDirectory
+        {
+            get
+            {
+                string codeBase = Assembly.GetExecutingAssembly().CodeBase;
+                UriBuilder uri = new UriBuilder(codeBase);
+                string path = Uri.UnescapeDataString(uri.Path);
+                return Path.GetDirectoryName(path);
+            }
+        }
         public static string TestFolder
         {
             get
             {
-                return IsLinux ? Path.Combine(TestContext.CurrentContext.TestDirectory, "testdata/") : Path.Combine(TestContext.CurrentContext.TestDirectory, "testdata\\");
+                return IsLinux ? Path.Combine(AssemblyDirectory, "testdata/") : Path.Combine(AssemblyDirectory, "testdata\\");
             }
         }
         private byte[] _checksum;
@@ -57,9 +68,9 @@ namespace SwiftPbo.Tests
         [Test]
         public void CreateArchiveTest()
         {
-            Assert.That(PboArchive.Create(Path.Combine(TestFolder, "cba_common"), "cba_common.pbo"));
+            Assert.That(PboArchive.Create(Path.Combine(TestFolder, "cba_common"), Path.Combine(TestFolder, "out", "cba_common.pbo")));
 
-            var pbo = new PboArchive("cba_common.pbo");
+            var pbo = new PboArchive(Path.Combine(TestFolder, "out", "cba_common.pbo"));
 
             Assert.That(pbo.Files.Count == 113);
 
@@ -89,9 +100,9 @@ namespace SwiftPbo.Tests
 
 
 
-            PboArchive.Clone("clone_common.pbo", pboArchive.ProductEntry, files, pboArchive.Checksum);
+            PboArchive.Clone(Path.Combine(TestFolder, "clone_common.pbo"), pboArchive.ProductEntry, files, pboArchive.Checksum);
 
-            var cloneArchive = new PboArchive("clone_common.pbo");
+            var cloneArchive = new PboArchive(Path.Combine(TestFolder, "clone_common.pbo"));
 
             Assert.That(pboArchive.Checksum.SequenceEqual(cloneArchive.Checksum), "Checksum dosen't match");
 
