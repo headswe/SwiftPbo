@@ -142,20 +142,6 @@ namespace SwiftPbo.Tests
                 Console.WriteLine("Checking if Files dosen't match - " + pboName);
                 FileAssert.AreEqual(pboPath, outPath, "Files dosen't match - " + pboName);
 
-                Console.WriteLine("Checking if Checksum dosen't match - " + pboName);
-                Assert.That(pboArchive.Checksum.SequenceEqual(cloneArchive.Checksum), "Checksum dosen't match - " + pboName);
-
-                Console.WriteLine("Checking if Checksum dosen't match - " + pboName);
-                Assert.That(pboArchive.Files.Count == cloneArchive.Files.Count, "Checksum dosen't match - " + pboName);
-
-                Console.WriteLine("Checking if Product name doesn't match ( " + pboArchive.ProductEntry.Name + " != " + cloneArchive.ProductEntry.Name + " )");
-                Assert.That(pboArchive.ProductEntry.Name == cloneArchive.ProductEntry.Name, "Product name doesn't match ( " + pboArchive.ProductEntry.Name + " != " + cloneArchive.ProductEntry.Name + " )");
-
-                Console.WriteLine("Checking if Product prefix doesn't match ( " + pboArchive.ProductEntry.Prefix + " != " + cloneArchive.ProductEntry.Prefix + " )");
-                Assert.That(pboArchive.ProductEntry.Prefix == cloneArchive.ProductEntry.Prefix, "Product prefix doesn't match ( " + pboArchive.ProductEntry.Prefix + " != " + cloneArchive.ProductEntry.Prefix + " )");
-
-                Console.WriteLine("Checking if Product addtional count doesn't match ( " + pboArchive.ProductEntry.Addtional.Count + " != " + cloneArchive.ProductEntry.Addtional.Count + " )");
-                Assert.That(pboArchive.ProductEntry.Addtional.Count == cloneArchive.ProductEntry.Addtional.Count, "Product addtional count doesn't match ( " + pboArchive.ProductEntry.Addtional.Count + " != " + cloneArchive.ProductEntry.Addtional.Count + " )");
             }
         }
 
