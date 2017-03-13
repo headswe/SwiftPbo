@@ -145,9 +145,10 @@ namespace SwiftPbo.Tests
                 foreach (var entry in pboArchive.Files)
                 {
                     Console.WriteLine("Adding " + entry.FileName);
-                    var info = new FileInfo(Path.Combine(tempFolder, GetFileName(entry)));
+                    string filename = GetFileName(entry);
+                    var info = new FileInfo(Path.Combine(tempFolder, filename));
 
-                    Console.WriteLine("Checking info exists for " + entry.FileName);
+                    Console.WriteLine("Checking info exists for " + filename);
                     Assert.That(info.Exists);
 
                     Console.WriteLine("Creating/adding " + entry.FileName);
@@ -175,10 +176,18 @@ namespace SwiftPbo.Tests
 
         public string GetFileName(FileEntry entry)
         {
-            if (IsLinux)
-                return Encoding.UTF8.GetString(entry.OrgName);
-            else
-                return entry.FileName;
+            //UTF encoding for saved path
+            string path = Path.GetDirectoryName(entry.FileName);
+            int fileStartIndex = path.Length;
+
+            string entrypath = Encoding.UTF8.GetString(entry.OrgName.Skip(fileStartIndex).Take(entry.OrgName.Length - fileStartIndex).ToArray());
+            if (entrypath.StartsWith("\\") || entrypath.StartsWith("/"))
+                entrypath = entrypath.Remove(0, 1);
+            if (entrypath.StartsWith("\\") || entrypath.StartsWith("/"))
+                entrypath = entrypath.Remove(0, 1);
+            var patharray = path.Split(new[] { '\\', '/' }).ToList();
+            patharray.Add(entrypath);
+            return Path.Combine(patharray.ToArray());
         }
         public ulong GetPackingMethod(PackingType type)
         {
