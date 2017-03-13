@@ -105,6 +105,73 @@ namespace SwiftPbo.Tests
 
         }
 
+        [Test]
+        public void CloneAllArchivesTest()
+        {
+            var testfiles = Directory.GetFiles(TestFolder, "*.pbo");
+            string outFolder = Path.Combine(TestFolder, "out");
+            foreach (var pboPath in testfiles)
+            {
+                string pboName = Path.GetFileName(pboPath);
+                var pboArchive = new PboArchive(Path.Combine(TestFolder, pboName));
+                var pboNameNoExt = pboName.Substring(0, pboName.Length - 4);
+                string tempFolder = Path.Combine(TestFolder, pboNameNoExt);
+                string outPath = Path.Combine(outFolder, pboNameNoExt + "_clone.pbo");
+                pboArchive.ExtractAll(tempFolder);
+                var files = new Dictionary<FileEntry, string>();
+
+                foreach (var entry in pboArchive.Files)
+                {
+                    var info = new FileInfo(Path.Combine(tempFolder, entry.FileName));
+                    Assert.That(info.Exists);
+
+                    files.Add(new FileEntry(Encoding.Default.GetString(entry.OrgName),
+                        GetPackingMethod(entry.PackingMethod),
+                        entry.OriginalSize,
+                        entry.TimeStamp,
+                        entry.DataSize,
+                        entry.Unknown),
+                        info.FullName);
+                }
+
+
+
+                PboArchive.Clone(outPath, pboArchive.ProductEntry, files, pboArchive.Checksum);
+
+                var cloneArchive = new PboArchive(outPath);
+
+                FileAssert.AreEqual(pboPath, outPath, "Files dosen't match - " + pboName);
+
+                Assert.That(pboArchive.Checksum.SequenceEqual(cloneArchive.Checksum), "Checksum dosen't match - " + pboName);
+
+                Assert.That(pboArchive.Files.Count == cloneArchive.Files.Count, "Checksum dosen't match - " + pboName);
+
+                Assert.That(pboArchive.ProductEntry.Name == cloneArchive.ProductEntry.Name);
+
+                Assert.That(pboArchive.ProductEntry.Prefix == cloneArchive.ProductEntry.Prefix);
+
+                Assert.That(pboArchive.ProductEntry.Addtional.Count == cloneArchive.ProductEntry.Addtional.Count);
+
+            }
+        }
+
+        public ulong GetPackingMethod(PackingType type)
+        {
+
+            switch (type)
+            {
+                case PackingType.Packed:
+                    return 0x43707273;
+                    break;
+                /*   case PackingType.Uncompressed:
+                        type = 0x0;
+                        break;*/
+                case PackingType.Uncompressed:
+                    return 0x56657273;
+                    break;
+            }
+            throw new System.Exception("Invalid packing type");
+        }
 
     }
 }
