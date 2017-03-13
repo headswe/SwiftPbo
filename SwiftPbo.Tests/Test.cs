@@ -147,7 +147,7 @@ namespace SwiftPbo.Tests
                 foreach (var entry in pboArchive.Files)
                 {
                     Console.WriteLine("Adding " + entry.FileName);
-                    string outfile = Path.Combine(tempFolder, entry.FileName);
+                    string outfile = Path.Combine(tempFolder, GetFileName(entry));
                     var info = new FileInfo(outfile);
 
                     Console.WriteLine("Creating/adding " + outfile);
