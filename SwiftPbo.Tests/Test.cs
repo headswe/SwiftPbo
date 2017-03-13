@@ -9,6 +9,21 @@ namespace SwiftPbo.Tests
     [TestFixture]
     class PboTest
     {
+        public static bool IsLinux
+        {
+            get
+            {
+                int p = (int)Environment.OSVersion.Platform;
+                return (p == 4) || (p == 6) || (p == 128);
+            }
+        }
+        public static string TestFolder
+        {
+            get
+            {
+                return IsLinux ? Path.Combine(TestContext.CurrentContext.TestDirectory, "testdata/") : Path.Combine(TestContext.CurrentContext.TestDirectory, "testdata\\");
+            }
+        }
         private byte[] _checksum;
         [SetUp]
         protected void SetUp()
@@ -24,7 +39,7 @@ namespace SwiftPbo.Tests
         [Test]
         public void OpenArchiveTest()
         {
-            var pboArchive = new PboArchive("testdata/cba_common.pbo");
+            var pboArchive = new PboArchive(Path.Combine(TestFolder, "cba_common.pbo"));
             Assert.That(pboArchive.Files.Count == 113);
 
 
@@ -41,7 +56,7 @@ namespace SwiftPbo.Tests
         [Test]
         public void CreateArchiveTest()
         {
-            Assert.That(PboArchive.Create("testdata\\cba_common", "cba_common.pbo"));
+            Assert.That(PboArchive.Create(Path.Combine(TestFolder, "cba_common"), "cba_common.pbo"));
 
             var pbo = new PboArchive("cba_common.pbo");
 
@@ -60,12 +75,13 @@ namespace SwiftPbo.Tests
         [Test]
         public void CloneArchiveTest()
         {
-            var pboArchive = new PboArchive("testdata/cba_common.pbo");
+            var pboArchive = new PboArchive(Path.Combine(TestFolder, "cba_common.pbo"));
+            pboArchive.ExtractAll(Path.Combine(TestFolder, "cba_common"));
             var files = new Dictionary<FileEntry, string>();
 
             foreach (var entry in pboArchive.Files)
             {
-                var info = new FileInfo(Path.Combine("testdata/cba_common", entry.FileName));
+                var info = new FileInfo(Path.Combine(TestFolder, "cba_common", entry.FileName));
                 Assert.That(info.Exists);
                 files.Add(entry, info.FullName);
             }
@@ -88,5 +104,7 @@ namespace SwiftPbo.Tests
 
 
         }
+
+
     }
 }
