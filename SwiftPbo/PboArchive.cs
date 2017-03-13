@@ -199,9 +199,9 @@ namespace SwiftPbo
                     }
                 }
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                throw;
+                throw ex;
             }
         }
 
