@@ -150,7 +150,7 @@ namespace SwiftPbo.Tests
                     string outfile = Path.Combine(tempFolder, entry.FileName);
                     var info = new FileInfo(outfile);
 
-                    Console.WriteLine("Creating/adding " + entry.FileName);
+                    Console.WriteLine("Creating/adding " + outfile);
                     files.Add(new FileEntry(entry.FileName,
                         GetPackingMethod(entry.PackingMethod),
                         entry.OriginalSize,
