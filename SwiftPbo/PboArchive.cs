@@ -428,7 +428,18 @@ namespace SwiftPbo
             return true;
         }
 
-        private Stream GetFileStream(FileEntry fileEntry)
+        public byte[] GetCRC(FileEntry fileEntry)
+        {
+            var md5 = System.Security.Cryptography.MD5.Create();
+            var fileStream = GetFileStream(fileEntry);
+            byte[] data = new byte[fileEntry.DataSize];
+            var stream = GetFileStream(fileEntry);
+            stream.Read(data, 0, (int)fileEntry.DataSize);
+            var hash = md5.ComputeHash(data);
+            stream.Close();
+            return hash;
+        }
+        public Stream GetFileStream(FileEntry fileEntry)
         {
             if (_stream != null)
             {
