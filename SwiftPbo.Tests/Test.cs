@@ -121,23 +121,36 @@ namespace SwiftPbo.Tests
         [Test]
         public void CloneAllArchivesTest()
         {
+            Console.WriteLine("Getting Pbos");
             var testfiles = Directory.GetFiles(TestFolder, "*.pbo");
+            Console.WriteLine("Getting Output Folder");
             string outFolder = Path.Combine(TestFolder, "out2");
             foreach (var pboPath in testfiles)
             {
+                Console.WriteLine("Starting " + pboPath);
                 string pboName = Path.GetFileName(pboPath);
+                Console.WriteLine("Working out archive name: " + pboPath);
                 var pboArchive = new PboArchive(Path.Combine(TestFolder, pboName));
+                Console.WriteLine("Remove extension: " + pboArchive);
                 var pboNameNoExt = pboName.Substring(0, pboName.Length - 4);
+                Console.WriteLine("Working out temp folder: " + pboNameNoExt);
                 string tempFolder = Path.Combine(TestFolder, pboNameNoExt);
+                Console.WriteLine("Working out output path: " + tempFolder);
                 string outPath = Path.Combine(outFolder, pboNameNoExt + "_clone.pbo");
+                Console.WriteLine("Extracting to " + outPath);
                 pboArchive.ExtractAll(tempFolder);
+
                 var files = new Dictionary<FileEntry, string>();
 
                 foreach (var entry in pboArchive.Files)
                 {
+                    Console.WriteLine("Adding " + entry.FileName);
                     var info = new FileInfo(Path.Combine(tempFolder, entry.FileName));
+
+                    Console.WriteLine("Checking info exists for " + entry.FileName);
                     Assert.That(info.Exists);
 
+                    Console.WriteLine("Creating/adding " + entry.FileName);
                     files.Add(new FileEntry(Encoding.GetEncoding(1252).GetString(entry.OrgName),
                         GetPackingMethod(entry.PackingMethod),
                         entry.OriginalSize,
@@ -148,14 +161,15 @@ namespace SwiftPbo.Tests
                 }
 
 
-
+                Console.WriteLine("Cloning to " + outPath);
                 PboArchive.Clone(outPath, pboArchive.ProductEntry, files, pboArchive.Checksum);
 
+                Console.WriteLine("Opening " + outPath);
                 var cloneArchive = new PboArchive(outPath);
 
-
+                Console.WriteLine("Checking Files match - " + pboName);
                 FileAssert.AreEqual(pboPath, outPath, "Files dosen't match - " + pboName);
-                Console.WriteLine("Checked Files match - " + pboName);
+
             }
         }
 
