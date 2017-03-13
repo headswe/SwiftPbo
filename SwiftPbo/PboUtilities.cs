@@ -38,7 +38,7 @@ namespace SwiftPbo
 
         public static void WriteString(FileStream stream, string str)
         {
-            var buffer = Encoding.UTF8.GetBytes(str + "\0");
+            var buffer = Encoding.Default.GetBytes(str + "\0");
             stream.Write(buffer, 0, buffer.Length);
         }
 
