@@ -12,7 +12,8 @@ namespace SwiftPbo
     public enum PackingType
     {
         Uncompressed,
-        Packed
+        Packed,
+        Encrypted
     };
 
     public class PboArchive : IDisposable
@@ -216,6 +217,9 @@ namespace SwiftPbo
             {
                 case PackingType.Packed:
                     packing = 0x43707273;
+                    break;
+                case PackingType.Encrypted:
+                    packing = 0x456e6372;
                     break;
             }
             PboUtilities.WriteLong(stream, packing);
