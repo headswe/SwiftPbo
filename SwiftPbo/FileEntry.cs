@@ -15,7 +15,7 @@ namespace SwiftPbo
         
         public ulong TimeStamp;
        
-        public ulong Unknown;
+        public ulong StartOffset;
         
         public ulong DataSize;
 

@@ -224,7 +224,7 @@ namespace SwiftPbo
             }
             PboUtilities.WriteLong(stream, packing);
             PboUtilities.WriteLong(stream, (long)entry.OriginalSize);
-            PboUtilities.WriteLong(stream, 0x0); // reserved
+            PboUtilities.WriteLong(stream, (long)entry.StartOffset);
             PboUtilities.WriteLong(stream, (long)entry.TimeStamp);
             PboUtilities.WriteLong(stream, (long)entry.DataSize);
         }
@@ -319,11 +319,11 @@ namespace SwiftPbo
 
             var size = PboUtilities.ReadLong(stream);
 
-            var unknown = PboUtilities.ReadLong(stream);
+            var startOffset = PboUtilities.ReadLong(stream);
 
             var timestamp = PboUtilities.ReadLong(stream);
             var datasize = PboUtilities.ReadLong(stream);
-            var entry = new FileEntry(this, filename, packing, size, timestamp, datasize, file, unknown);
+            var entry = new FileEntry(this, filename, packing, size, timestamp, datasize, file, startOffset);
             if (entry.FileName == "")
             {
                 entry.OrgName = new byte[0];
