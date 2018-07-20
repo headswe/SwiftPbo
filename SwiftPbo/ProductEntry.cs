@@ -6,9 +6,9 @@ namespace SwiftPbo
     [Serializable]
     public class ProductEntry
     {
-        private String _name;
-        private String _prefix;
-        private String _productVersion;
+        private string _name;
+        private string _prefix;
+        private string _productVersion;
         private List<string> _addtional = new List<string>();
 
         public ProductEntry()

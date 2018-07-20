@@ -7,7 +7,7 @@ namespace SwiftPbo
     
     public class FileEntry
     {
-        public String _fileName;
+        public string _fileName;
         
         public PackingType PackingMethod = PackingType.Uncompressed;
         
@@ -30,7 +30,7 @@ namespace SwiftPbo
 
         public override string ToString()
         {
-            return String.Format("{0} ({1})", _fileName, OriginalSize);
+            return string.Format("{0} ({1})", _fileName, OriginalSize);
         }
 
         [NonSerialized]
@@ -70,6 +70,7 @@ namespace SwiftPbo
             OrgName = file;
         }
 
+        public bool Extract(string outpath)
         {
             if(ParentArchive == null)
                 throw  new Exception("No parent Archive");

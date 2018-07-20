@@ -27,7 +27,7 @@ namespace SwiftPbo
 
         private static readonly List<char> InvaildFile = Path.GetInvalidFileNameChars().ToList();
 
-        public static Boolean Create(string directoryPath, string outpath)
+        public static bool Create(string directoryPath, string outpath)
         {
             var dir = new DirectoryInfo(directoryPath);
             if (!dir.Exists)
@@ -57,7 +57,7 @@ namespace SwiftPbo
             }
             return Create(directoryPath, outpath, entry);
         }
-        public static Boolean Create(string directoryPath, string outpath, ProductEntry productEntry)
+        public static bool Create(string directoryPath, string outpath, ProductEntry productEntry)
         {
             var dir = new DirectoryInfo(directoryPath);
             if (!dir.Exists)
@@ -117,10 +117,10 @@ namespace SwiftPbo
             return true;
         }
 
-        private static readonly List<Char> InvaildPath = Path.GetInvalidPathChars().ToList();
+        private static readonly List<char> InvaildPath = Path.GetInvalidPathChars().ToList();
         private static byte[] _file;
 
-        public static String SterilizePath(String path)
+        public static string SterilizePath(string path)
         {
             
             var arr = Path.GetDirectoryName(path).ToCharArray();
@@ -141,7 +141,7 @@ namespace SwiftPbo
                 {
                     continue;
                 }
-                filename[i] = ((Char)(Math.Min(90, 65 + ch % 5)));
+                filename[i] = ((char)(Math.Min(90, 65 + ch % 5)));
             }
             return Path.Combine(builder.ToString(), new string(filename));
         }
@@ -156,7 +156,7 @@ namespace SwiftPbo
         {
             try
             {
-                if (!Directory.Exists(Path.GetDirectoryName(path)) && !String.IsNullOrEmpty(Path.GetDirectoryName(path)))
+                if (!Directory.Exists(Path.GetDirectoryName(path)) && !string.IsNullOrEmpty(Path.GetDirectoryName(path)))
                     Directory.CreateDirectory(Path.GetDirectoryName(path) );
                 using (var stream = File.Create(path))
                 {
@@ -233,15 +233,15 @@ namespace SwiftPbo
         {
             PboUtilities.WriteString(stream, "sreV");
             stream.Write(new byte[15], 0, 15);
-            if (!String.IsNullOrEmpty(productEntry.Name))
+            if (!string.IsNullOrEmpty(productEntry.Name))
                 PboUtilities.WriteString(stream, productEntry.Name);
             else
                 return;
-            if (!String.IsNullOrEmpty(productEntry.Prefix))
+            if (!string.IsNullOrEmpty(productEntry.Prefix))
                 PboUtilities.WriteString(stream, productEntry.Prefix);
             else
                 return;
-            if (!String.IsNullOrEmpty(productEntry.ProductVersion))
+            if (!string.IsNullOrEmpty(productEntry.ProductVersion))
                 PboUtilities.WriteString(stream, productEntry.ProductVersion);
             else
                 return;
@@ -333,7 +333,7 @@ namespace SwiftPbo
             return true;
         }
 
-        private Boolean ReadHeader(FileStream stream)
+        private bool ReadHeader(FileStream stream)
         {
             // TODO FIX SO BROKEN
             var str = PboUtilities.ReadString(stream);
@@ -345,19 +345,18 @@ namespace SwiftPbo
                 stream.ReadByte();
                 count++;
             }
-            var prefix = "";
             var list = new List<string>();
             var pboname = "";
             var version = "";
-            prefix = PboUtilities.ReadString(stream);
-            if (!String.IsNullOrEmpty(prefix))
+            var prefix = PboUtilities.ReadString(stream);
+            if (!string.IsNullOrEmpty(prefix))
             {
                 pboname = PboUtilities.ReadString(stream);
-                if (!String.IsNullOrEmpty(pboname))
+                if (!string.IsNullOrEmpty(pboname))
                 {
                     version = PboUtilities.ReadString(stream);
 
-                    if (!String.IsNullOrEmpty(version))
+                    if (!string.IsNullOrEmpty(version))
                     {
                         while (stream.ReadByte() != 0x0)
                         {
@@ -373,7 +372,7 @@ namespace SwiftPbo
             return true;
         }
 
-        public Boolean ExtractAll(string outpath)
+        public bool ExtractAll(string outpath)
         {
             if (!Directory.Exists(outpath))
                 Directory.CreateDirectory(outpath);
@@ -406,9 +405,9 @@ namespace SwiftPbo
             return true;
         }
 
-        public Boolean Extract(FileEntry fileEntry, string outpath)
+        public bool Extract(FileEntry fileEntry, string outpath)
         {
-            if(String.IsNullOrEmpty(outpath))
+            if(string.IsNullOrEmpty(outpath))
                 throw new NullReferenceException("Is null or empty");
             Stream mem = GetFileStream(fileEntry);
             if (mem == null)
@@ -466,8 +465,7 @@ namespace SwiftPbo
 
         public void Dispose()
         {
-            if(_stream != null)
-                _stream.Dispose();
+            _stream?.Dispose();
         }
     }
 }
