@@ -34,7 +34,7 @@ namespace SwiftPbo
         }
 
         [NonSerialized]
-        private readonly PboArchive _parentArchive;
+        public readonly PboArchive ParentArchive;
 
         public byte[] OrgName;
 
@@ -79,18 +79,18 @@ namespace SwiftPbo
         }
         public Boolean Extract(string outpath)
         {
-            if(_parentArchive == null)
+            if(ParentArchive == null)
                 throw  new Exception("No parent Archive");
             if (!Directory.Exists(Path.GetDirectoryName(outpath)))
                 Directory.CreateDirectory(Path.GetDirectoryName(outpath));
-            return _parentArchive.Extract(this, outpath);
+            return ParentArchive.Extract(this, outpath);
         }
 
         public Stream Extract()
         {
-            if (_parentArchive == null)
+            if (ParentArchive == null)
                 throw new Exception("No parent Archive");
-            return _parentArchive.Extract(this);
+            return ParentArchive.Extract(this);
         }
     }
 }
