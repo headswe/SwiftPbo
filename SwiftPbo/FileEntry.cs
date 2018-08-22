@@ -7,7 +7,7 @@ namespace SwiftPbo
     
     public class FileEntry
     {
-        public String _fileName;
+        public string _fileName;
         
         public PackingType PackingMethod = PackingType.Uncompressed;
         
@@ -15,7 +15,7 @@ namespace SwiftPbo
         
         public ulong TimeStamp;
        
-        public ulong Unknown;
+        public ulong StartOffset;
         
         public ulong DataSize;
 
@@ -30,67 +30,60 @@ namespace SwiftPbo
 
         public override string ToString()
         {
-            return String.Format("{0} ({1})", _fileName, OriginalSize);
+            return string.Format("{0} ({1})", _fileName, OriginalSize);
         }
 
         [NonSerialized]
-        private readonly PboArchive _parentArchive;
+        public readonly PboArchive ParentArchive;
 
         public byte[] OrgName;
 
-        public FileEntry(PboArchive parent, string filename, ulong type, ulong osize, ulong timestamp, ulong datasize, byte[] file, ulong unknown = 0x0)
+
+        public FileEntry(string filename, ulong type, ulong osize, ulong timestamp, ulong datasize, ulong startOffset = 0x0)
         {
-            _parentArchive = parent;
             _fileName = filename;
+            switch (type)
+            {
+                case 0x0:
+                    PackingMethod = PackingType.Uncompressed;
+                    break;
+                case 0x43707273:
+                    PackingMethod = PackingType.Packed;
+                    break;
+                case 0x56657273: //Vers
+                    PackingMethod = PackingType.Uncompressed;
+                    break;
+                case 0x456e6372: //Encr
+                    PackingMethod = PackingType.Encrypted;
+                    break;
+            }
+            OriginalSize = osize;
+            TimeStamp = timestamp;
+            DataSize = datasize;
+            StartOffset = startOffset;
+        }
+
+        public FileEntry(PboArchive parent, string filename, ulong type, ulong osize, ulong timestamp, ulong datasize, byte[] file, ulong startOffset = 0x0)
+        : this(filename, type, osize, timestamp, datasize)
+        {
+            ParentArchive = parent;
             OrgName = file;
-            switch (type)
-            {
-                case 0x43707273:
-                    PackingMethod = PackingType.Packed;
-                    break;
-                case 0x0:
-                    PackingMethod = PackingType.Uncompressed;
-                    break;
-                case 0x56657273:
-                    PackingMethod = PackingType.Uncompressed;
-                    break;
-            }
-            OriginalSize = osize;
-            TimeStamp = timestamp;
-            DataSize = datasize;
-            Unknown = unknown;
         }
-        public FileEntry(string filename, ulong type, ulong osize, ulong timestamp, ulong datasize, ulong unknown = 0x0)
+
+        public bool Extract(string outpath)
         {
-            _fileName = filename;
-            switch (type)
-            {
-                case 0x43707273:
-                    PackingMethod = PackingType.Packed;
-                    break;
-                case 0x0:
-                    PackingMethod = PackingType.Uncompressed;
-                    break;
-            }
-            OriginalSize = osize;
-            TimeStamp = timestamp;
-            DataSize = datasize;
-            Unknown = unknown;
-        }
-        public Boolean Extract(string outpath)
-        {
-            if(_parentArchive == null)
+            if(ParentArchive == null)
                 throw  new Exception("No parent Archive");
             if (!Directory.Exists(Path.GetDirectoryName(outpath)))
                 Directory.CreateDirectory(Path.GetDirectoryName(outpath));
-            return _parentArchive.Extract(this, outpath);
+            return ParentArchive.Extract(this, outpath);
         }
 
         public Stream Extract()
         {
-            if (_parentArchive == null)
+            if (ParentArchive == null)
                 throw new Exception("No parent Archive");
-            return _parentArchive.Extract(this);
+            return ParentArchive.Extract(this);
         }
     }
 }

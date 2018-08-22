@@ -22,7 +22,7 @@ namespace SwiftPbo
             writer.Write(buffer, 0, 4);
         }
 
-        public static String ReadString(Stream reader)
+        public static string ReadString(Stream reader)
         {
             var str = "";
             while (true)
@@ -55,9 +55,9 @@ namespace SwiftPbo
             return Uri.UnescapeDataString(folderUri.MakeRelativeUri(pathUri).ToString().Replace('/', Path.DirectorySeparatorChar));
         }
 
-        public static Byte[] ReadStringArray(Stream reader)
+        public static byte[] ReadStringArray(Stream reader)
         {
-            var list = new List<Byte>();
+            var list = new List<byte>();
             while (true)
             {
                 var ch =  (byte)reader.ReadByte();
@@ -69,9 +69,9 @@ namespace SwiftPbo
             return list.ToArray();
         }
 
-        public static void WriteASIIZ(FileStream stream, Byte[] fileName)
+        public static void WriteASIIZ(FileStream stream, byte[] fileName)
         {
-            var copy = new Byte[fileName.Count()+1];
+            var copy = new byte[fileName.Count()+1];
             fileName.CopyTo(copy,0);
             copy[fileName.Length] = 0x0;
             stream.Write(copy, 0, copy.Length);
